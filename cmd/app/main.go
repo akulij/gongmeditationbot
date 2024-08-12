@@ -95,6 +95,12 @@ func main() {
     var bc = GetBotController()
 
     for update := range bc.updates {
+        go ProcessUpdate(bc, update)
+    }
+}
+
+func ProcessUpdate(bc BotController, update tgbotapi.Update) {
+
         if update.Message != nil {
             var UserID = update.Message.From.ID
 
@@ -241,7 +247,7 @@ func main() {
                     if err != nil {
                         msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Something went wrong, try again...")
                         bc.bot.Send(msg)
-                        continue
+                        return
                     }
 
                     bc.db.Model(&user).Update("state", "start")
@@ -330,7 +336,6 @@ func main() {
                 }
             }
         }
-    }
 }
 
 func DownloadFile(filepath string, url string) error {
