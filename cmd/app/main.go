@@ -139,9 +139,12 @@ func main() {
                     msg.ReplyMarkup = kbd
                     bc.bot.Send(msg)
                 } else {
-                    url, _ := bc.bot.GetFileDirectURL(img)
-                    DownloadFile("./preview.jpg", url)
-                    msg := tgbotapi.NewPhoto(update.Message.Chat.ID, tgbotapi.FilePath("./preview.jpg"))
+                    filename := "./" + img + ".jpg"
+                    if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
+                        url, _ := bc.bot.GetFileDirectURL(img)
+                        DownloadFile(filename, url)
+                    }
+                    msg := tgbotapi.NewPhoto(update.Message.Chat.ID, tgbotapi.FilePath(filename))
                     msg.Caption = bc.GetBotContent("start")
                     msg.ReplyMarkup = kbd
                     bc.bot.Send(msg)
