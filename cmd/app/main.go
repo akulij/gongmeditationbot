@@ -86,7 +86,9 @@ func (bc BotController) GetBotContent(Literal string) string {
     return content
 }
 func (bc BotController) SetBotContent(Literal string, Content string) {
-    bc.db.Create(&BotContent{Literal: Literal, Content: Content})
+    c := BotContent{Literal: Literal, Content: Content}
+    bc.db.FirstOrCreate(&c, "Literal", Literal)
+    bc.db.Model(&c).Update("Content", Content)
 }
 
 func main() {
@@ -130,7 +132,7 @@ func main() {
                     )
                 }
                 img, err := bc.GetBotContentVerbose("preview_image")
-                if err != nil {
+                if err != nil || img == "" {
                     msg := tgbotapi.NewMessage(update.Message.Chat.ID, bc.GetBotContent("start"))
                     // msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Hello, [user](tg://user?id=958170391)")
                     msg.ParseMode = "markdown"
@@ -185,7 +187,7 @@ func main() {
                         if update.Message.Text == "unset" {
                             var l BotContent
                             bc.db.First(&l, "Literal", Literal)
-                            bc.db.Delete(l)
+                            bc.SetBotContent(Literal, "")
                         }
                         maxsize := 0
                         fileid := ""
@@ -196,13 +198,16 @@ func main() {
                             }
                         }
                         bc.SetBotContent(Literal, fileid)
+                        bc.db.Model(&user).Update("state", "start")
+                        msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Succesfully set new image!")
+                        bc.bot.Send(msg)
                     } else if strings.HasPrefix(user.State, "stringset:") {
                         Literal := strings.Split(user.State, ":")[1]
                         bc.SetBotContent(Literal, update.Message.Text)
+                        bc.db.Model(&user).Update("state", "start")
+                        msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Succesfully set new text!")
+                        bc.bot.Send(msg)
                     }
-                    bc.db.Model(&user).Update("state", "start")
-                    msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Succesfully set new image!")
-                    bc.bot.Send(msg)
                 }
             } else {
                 if user.State == "leaveticket" {
@@ -216,7 +221,7 @@ func main() {
                     chatidstr, err := bc.GetBotContentVerbose("supportchatid")
                     if err != nil {
                         var admins []User
-                        bc.db.Where("RoleBitmask & 1 = ?", 1).Find(&admins)
+                        bc.db.Where("role_bitmask & 1 = ?", 1).Find(&admins)
                         for _, admin := range admins {
                             msg := tgbotapi.NewMessage(admin.ID, "Support ChatID is not set!!!")
                             msg.Entities = []tgbotapi.MessageEntity{tgbotapi.MessageEntity{
@@ -248,7 +253,7 @@ func main() {
                 chatidstr, err := bc.GetBotContentVerbose("channelid")
                 if err != nil {
                     var admins []User
-                    bc.db.Where("RoleBitmask & 1 = ?", 1).Find(&admins)
+                    bc.db.Where("role_bitmask & 1 = ?", 1).Find(&admins)
                     for _, admin := range admins {
                         bc.bot.Send(tgbotapi.NewMessage(admin.ID, "ChannelID is not set!!!"))
                     }
@@ -306,6 +311,19 @@ func main() {
                     msg := tgbotapi.NewMessage(user.ID, "Выберите пункт для изменения")
                     msg.ReplyMarkup = kbd
                     bc.bot.Send(msg)
+                }
+            }
+        } else if update.ChannelPost != nil { // TODO
+            post := update.ChannelPost
+            if post.Text == "setchannelid" {
+                bc.SetBotContent("channelid", strconv.FormatInt(post.SenderChat.ID, 10))
+
+                var admins []User
+                bc.db.Where("role_bitmask & 1 = ?", 1).Find(&admins)
+                for _, admin := range admins {
+                    bc.bot.Send(tgbotapi.NewMessage(admin.ID, "ChannelID is set to " + strconv.FormatInt(post.SenderChat.ID, 10)))
+                    delcmd := tgbotapi.NewDeleteMessage(post.SenderChat.ID, post.MessageID)
+                    bc.bot.Send(delcmd)
                 }
             }
         }
