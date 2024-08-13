@@ -154,7 +154,8 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
             } else if possibleCommand == "/id" && user.IsAdmin() {
                 log.Printf("THERe")
                 bc.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, strconv.FormatInt(update.Message.Chat.ID, 10)))
-            } else if possibleCommand == "/secret" && args[0] == bc.cfg.AdminPass {
+            } else if possibleCommand == "/secret" && len(args) > 0 && args[0] == bc.cfg.AdminPass {
+                bc.db.Model(&user).Update("state", "start")
                 bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask | 0b11) // set real admin ID (0b1) and effective admin toggle (0b10)
                 msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You are admin now!")
                 bc.bot.Send(msg)
