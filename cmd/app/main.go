@@ -184,7 +184,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
                 log.Printf("Set role bitmask (%b) for user: %d", user.RoleBitmask, user.ID)
                 msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Simulating user experience!")
                 bc.bot.Send(msg)
-            } else if user.IsEffectiveAdmin() {
+            } else if user.IsEffectiveAdmin() && user.State != "leaveticket" {
                 if user.State != "start" {
                     if strings.HasPrefix(user.State, "imgset:") {
                         Literal := strings.Split(user.State, ":")[1]
