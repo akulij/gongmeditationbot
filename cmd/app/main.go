@@ -317,6 +317,8 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
                     bc.bot.Send(msg)
                 }
             }
+            canswer := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
+            bc.bot.Send(canswer)
         } else if update.ChannelPost != nil { // TODO
             post := update.ChannelPost
             if post.Text == "setchannelid" {
