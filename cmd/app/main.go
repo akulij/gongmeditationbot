@@ -145,12 +145,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
                     msg.ReplyMarkup = kbd
                     bc.bot.Send(msg)
                 } else {
-                    filename := "./" + img + ".jpg"
-                    if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
-                        url, _ := bc.bot.GetFileDirectURL(img)
-                        DownloadFile(filename, url)
-                    }
-                    msg := tgbotapi.NewPhoto(update.Message.Chat.ID, tgbotapi.FilePath(filename))
+                    msg := tgbotapi.NewPhoto(update.Message.Chat.ID, tgbotapi.FileID(img))
                     msg.Caption = bc.GetBotContent("start")
                     msg.ReplyMarkup = kbd
                     bc.bot.Send(msg)
