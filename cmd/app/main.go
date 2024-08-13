@@ -122,6 +122,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
             log.Printf("Args: %s", args)
 
             if possibleCommand == "/start" {
+                bc.db.Model(&user).Update("state", "start")
                 kbd := tgbotapi.NewInlineKeyboardMarkup(
                     tgbotapi.NewInlineKeyboardRow(
                         tgbotapi.NewInlineKeyboardButtonData(bc.GetBotContent("leave_ticket_button"), "leave_ticket_button"),
