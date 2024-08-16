@@ -7,6 +7,7 @@ RUN go mod download
 
 COPY . .
 RUN go env -w CGO_ENABLED=1
-RUN go build -o app ./cmd/app
+ENV GOCACHE=/root/.cache/go-build
+RUN --mount=type=cache,target="/root/.cache/go-build" go build -o app ./cmd/app
 WORKDIR /storage
 CMD ["/build/app"]
