@@ -176,6 +176,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
                     tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Уведомление об отправке тикета", "update:sended_notify")),
                     tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба оставить тикет", "update:leaveticket_message")),
                     tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба подписаться на канал", "update:subscribe_message")),
+                    tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ссылка на канал", "update:channel_link")),
                 )
                 msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите пункт для изменения")
                 msg.ReplyMarkup = kbd
@@ -284,7 +285,29 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
                     bc.db.Model(&user).Update("state", "leaveticket")
                     bc.bot.Send(tgbotapi.NewMessage(user.ID, bc.GetBotContent("leaveticket_message")))
                 } else {
-                    bc.bot.Send(tgbotapi.NewMessage(user.ID, bc.GetBotContent("subscribe_message")))
+                    link, err := bc.GetBotContentVerbose("channel_link")
+                    msg := tgbotapi.NewMessage(user.ID, bc.GetBotContent("subscribe_message"))
+                    if err == nil {
+                        kbd := tgbotapi.NewInlineKeyboardMarkup(
+                            tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonURL("Канал", link)),
+                        )
+                        msg.ReplyMarkup = kbd
+                    }
+                    if err != nil {
+                        log.Printf("NO LINK!!!")
+                        var admins []User
+                        bc.db.Where("role_bitmask & 1 = ?", 1).Find(&admins)
+                        for _, admin := range admins {
+                            msg := tgbotapi.NewMessage(admin.ID, "Channel link is not set!!!")
+                            msg.Entities = []tgbotapi.MessageEntity{tgbotapi.MessageEntity{
+                                Type: "code",
+                                Offset: 1,
+                                Length: 2,
+                            }}
+                            bc.bot.Send(msg)
+                        }
+                    }
+                    bc.bot.Send(msg)
                 }
             } else if user.IsEffectiveAdmin() {
                 if strings.HasPrefix(update.CallbackQuery.Data, "update:") {
@@ -313,6 +336,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
                         tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Уведомление об отправке тикета", "update:sended_notify")),
                         tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба оставить тикет", "update:leaveticket_message")),
                         tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба подписаться на канал", "update:subscribe_message")),
+                        tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("ССылка на канал", "update:channel_link")),
                     )
                     msg := tgbotapi.NewMessage(user.ID, "Выберите пункт для изменения")
                     msg.ReplyMarkup = kbd
