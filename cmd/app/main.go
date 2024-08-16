@@ -336,7 +336,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
                         tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Уведомление об отправке тикета", "update:sended_notify")),
                         tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба оставить тикет", "update:leaveticket_message")),
                         tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба подписаться на канал", "update:subscribe_message")),
-                        tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("ССылка на канал", "update:channel_link")),
+                        tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ссылка на канал", "update:channel_link")),
                     )
                     msg := tgbotapi.NewMessage(user.ID, "Выберите пункт для изменения")
                     msg.ReplyMarkup = kbd
