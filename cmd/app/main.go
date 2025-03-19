@@ -47,19 +47,32 @@ type BotController struct {
     updates tgbotapi.UpdatesChannel
 }
 
+func DBMigrate() (*gorm.DB, error) {
+    db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+    if err != nil {
+        return db, err
+    }
+
+    db.AutoMigrate(&User{})
+    db.AutoMigrate(&BotContent{})
+
+    return db, err
+}
+
 func GetBotController() BotController {
     cfg := config.GetConfig()
     fmt.Printf("Token value: '%v'\n", cfg.BotToken)
     fmt.Printf("Admin password: '%v'\n", cfg.AdminPass)
+
     bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
     if err != nil {
          log.Panic(err)
     }
 
-    db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
-    db.AutoMigrate(&User{})
-    db.AutoMigrate(&BotContent{})
-
+    db, err := DBMigrate()
+    if err != nil {
+         log.Panic(err)
+    }
 
     bot.Debug = true
 
