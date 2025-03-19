@@ -74,7 +74,7 @@ func GetBotController() BotController {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	bot.Debug = true // set true only while development, should be set to false in production
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
