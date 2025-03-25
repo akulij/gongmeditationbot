@@ -27,7 +27,7 @@ func GetBotController() BotController {
 	cfg := config.GetConfig()
 	fmt.Printf("Token value: '%v'\n", cfg.BotToken)
 	fmt.Printf("Admin password: '%v'\n", cfg.AdminPass)
-	fmt.Printf("Admin ID: '%v'\n", cfg.AdminID)
+	fmt.Printf("Admin ID: '%v'\n", *cfg.AdminID)
 
 	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
