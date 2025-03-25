@@ -7,6 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type User struct {
+	gorm.Model
+	ID          int64
+	State       string
+	MsgCounter  uint
+	RoleBitmask uint
+}
+
 func (u User) IsAdmin() bool {
 	return u.RoleBitmask&1 == 1
 }

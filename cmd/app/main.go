@@ -16,14 +16,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
-	gorm.Model
-	ID          int64
-	State       string
-	MsgCounter  uint
-	RoleBitmask uint
-}
-
 type BotController struct {
 	cfg     config.Config
 	bot     *tgbotapi.BotAPI
