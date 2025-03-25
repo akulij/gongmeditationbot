@@ -384,13 +384,14 @@ func DownloadFile(filepath string, url string) error {
 func notifyAdminAboutError(bc BotController, errorMessage string) {
 	// Check if AdminID is set in the config
     adminID := *bc.cfg.AdminID
-	if adminID != 0 {
-		msg := tgbotapi.NewMessage(
-			adminID,
-			fmt.Sprintf("Error occurred: %s", errorMessage),
-		)
-		bc.bot.Send(msg)
-	} else {
+	if adminID == 0 {
 		log.Println("AdminID is not set in the configuration.")
 	}
+
+
+	msg := tgbotapi.NewMessage(
+		adminID,
+		fmt.Sprintf("Error occurred: %s", errorMessage),
+	)
+	bc.bot.Send(msg)
 }
