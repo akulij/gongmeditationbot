@@ -35,6 +35,7 @@ func GetBotController() BotController {
 	cfg := config.GetConfig()
 	fmt.Printf("Token value: '%v'\n", cfg.BotToken)
 	fmt.Printf("Admin password: '%v'\n", cfg.AdminPass)
+	fmt.Printf("Admin ID: '%v'\n", cfg.AdminID)
 
 	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
@@ -386,4 +387,18 @@ func DownloadFile(filepath string, url string) error {
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+func notifyAdminAboutError(bc BotController, errorMessage string) {
+	// Check if AdminID is set in the config
+    adminID := *bc.cfg.AdminID
+	if adminID != 0 {
+		msg := tgbotapi.NewMessage(
+			adminID,
+			fmt.Sprintf("Error occurred: %s", errorMessage),
+		)
+		bc.bot.Send(msg)
+	} else {
+		log.Println("AdminID is not set in the configuration.")
+	}
 }
