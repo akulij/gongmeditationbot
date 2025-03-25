@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-    BotToken string `env:"BOTTOKEN, required"`
+    BotToken  string `env:"BOTTOKEN, required"`
     AdminPass string `env:"ADMINPASSWORD, required"` // to activate admin privileges in bot type command: /secret `AdminPass`
     AdminID   *int64 `env:"ADMINID"` // optional admin ID for notifications
 }
