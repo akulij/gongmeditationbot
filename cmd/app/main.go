@@ -292,6 +292,35 @@ func handleDefaultMessage(bc BotController, update tgbotapi.Update, user User) {
 		bc.db.Model(&user).Update("state", "start")
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, bc.GetBotContent("sended_notify"))
 		bc.bot.Send(msg)
+	} else if user.IsEffectiveAdmin() {
+		if user.State != "start" {
+			if strings.HasPrefix(user.State, "imgset:") {
+				Literal := strings.Split(user.State, ":")[1]
+				if update.Message.Text == "unset" {
+					var l BotContent
+					bc.db.First(&l, "Literal", Literal)
+					bc.SetBotContent(Literal, "")
+				}
+				maxsize := 0
+				fileid := ""
+				for _, p := range update.Message.Photo {
+					if p.FileSize > maxsize {
+						fileid = p.FileID
+						maxsize = p.FileSize
+					}
+				}
+				bc.SetBotContent(Literal, fileid)
+				bc.db.Model(&user).Update("state", "start")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Successfully set new image!")
+				bc.bot.Send(msg)
+			} else if strings.HasPrefix(user.State, "stringset:") {
+				Literal := strings.Split(user.State, ":")[1]
+				bc.SetBotContent(Literal, update.Message.Text)
+				bc.db.Model(&user).Update("state", "start")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Successfully set new text!")
+				bc.bot.Send(msg)
+			}
+		}
 	}
 }
 
