@@ -34,7 +34,7 @@ func GetBotController() BotController {
 		log.Panic(err)
 	}
 
-	db, err := DBMigrate()
+	db, err := GetDB()
 	if err != nil {
 		log.Panic(err)
 	}

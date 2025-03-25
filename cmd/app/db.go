@@ -29,7 +29,7 @@ type BotContent struct {
 	Content string
 }
 
-func DBMigrate() (*gorm.DB, error) {
+func GetDB() (*gorm.DB, error) {
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		return db, err
