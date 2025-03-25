@@ -15,5 +15,3 @@ jobs:
         run: |
           ls ${{ gitea.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-      - name: Push to server
-        run: curl http://178.130.41.138:9000/hooks/redeploy-webhook
