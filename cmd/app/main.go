@@ -24,14 +24,6 @@ type User struct {
 	RoleBitmask uint
 }
 
-func (u User) IsAdmin() bool {
-	return u.RoleBitmask&1 == 1
-}
-
-func (u User) IsEffectiveAdmin() bool {
-	return u.RoleBitmask&0b10 == 0b10
-}
-
 type BotController struct {
 	cfg     config.Config
 	bot     *tgbotapi.BotAPI

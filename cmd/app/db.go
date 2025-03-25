@@ -7,6 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
+func (u User) IsAdmin() bool {
+	return u.RoleBitmask&1 == 1
+}
+
+func (u User) IsEffectiveAdmin() bool {
+	return u.RoleBitmask&0b10 == 0b10
+}
+
 type BotContent struct {
 	gorm.Model
 	Literal string
