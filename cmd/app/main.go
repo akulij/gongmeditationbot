@@ -140,26 +140,7 @@ func handleSecretCommand(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handlePanelCommand(bc BotController, update tgbotapi.Update, user User) {
-    if !user.IsAdmin() {return}
-	if !user.IsEffectiveAdmin() {
-		bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask|0b10)
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You was in usermode, turned back to admin mode...")
-		bc.bot.Send(msg)
-	}
-	kbd := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Стартовая картинка", "update:preview_image")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Приветственный текст", "update:start")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Кнопка для заявки", "update:leave_ticket_button")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("ID чата", "update:supportchatid")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("ID канала", "update:channelid")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Уведомление об отправке тикета", "update:sended_notify")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба оставить тикет", "update:leaveticket_message")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба подписаться на канал", "update:subscribe_message")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ссылка на канал", "update:channel_link")),
-	)
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите пункт для изменения")
-	msg.ReplyMarkup = kbd
-	bc.bot.Send(msg)
+    handlePanel(bc, user)
 }
 
 func handleUserModeCommand(bc BotController, update tgbotapi.Update, user User) {
@@ -309,26 +290,7 @@ func handleAdminCallback(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handlePanelCallback(bc BotController, update tgbotapi.Update, user User) {
-    if !user.IsAdmin() {return}
-	if !user.IsEffectiveAdmin() {
-		bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask|0b10)
-		msg := tgbotapi.NewMessage(user.ID, "You was in usermode, turned back to admin mode...")
-		bc.bot.Send(msg)
-	}
-	kbd := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Стартовая картинка", "update:preview_image")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Приветственный текст", "update:start")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Кнопка для заявки", "update:leave_ticket_button")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("ID чата", "update:supportchatid")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("ID канала", "update:channelid")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Уведомление об отправке тикета", "update:sended_notify")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба оставить тикет", "update:leaveticket_message")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Просьба подписаться на канал", "update:subscribe_message")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ссылка на канал", "update:channel_link")),
-	)
-	msg := tgbotapi.NewMessage(user.ID, "Выберите пункт для изменения")
-	msg.ReplyMarkup = kbd
-	bc.bot.Send(msg)
+    handlePanel(bc, user)
 }
 
 func DownloadFile(filepath string, url string) error {
