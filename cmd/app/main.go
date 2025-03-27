@@ -13,8 +13,8 @@ import (
 )
 
 var adminCommands = map[string]func(BotController, tgbotapi.Update, User){
-	"/secret":       handleDefaultMessage, // activate admin mode via /secret `AdminPass`
-	"/panel":        handleDefaultMessage, // open bot settings
+	"/secret":       handleSecretCommand,  // activate admin mode via /secret `AdminPass`
+	"/panel":        handlePanelCommand,   // open bot settings
 	"/usermode":     handleDefaultMessage, // temporarly disable admin mode to test ui
 	"/id":           handleDefaultMessage, // to check id of chat
 	"/setchannelid": handleDefaultMessage, // just type it in channel which one is supposed to be lined with bot
