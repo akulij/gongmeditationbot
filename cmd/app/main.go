@@ -16,6 +16,15 @@ import (
 	"gorm.io/gorm"
 )
 
+var adminCommands = map[string]func(BotController, tgbotapi.Update){
+	"/secret":       handleMessage, // activate admin mode via /secret `AdminPass`
+	"/panel":        handleMessage, // open bot settings
+	"/usermode":     handleMessage, // temporarly disable admin mode to test ui
+	"/id":           handleMessage, // to check id of chat
+	"/setchannelid": handleMessage, // just type it in channel which one is
+                                    // supposed to be lined with bot
+}
+
 type BotController struct {
 	cfg     config.Config
 	bot     *tgbotapi.BotAPI
