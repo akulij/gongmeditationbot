@@ -12,12 +12,12 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var adminCommands = map[string]func(BotController, tgbotapi.Update){
-	"/secret":       handleMessage, // activate admin mode via /secret `AdminPass`
-	"/panel":        handleMessage, // open bot settings
-	"/usermode":     handleMessage, // temporarly disable admin mode to test ui
-	"/id":           handleMessage, // to check id of chat
-	"/setchannelid": handleMessage, // just type it in channel which one is supposed to be lined with bot
+var adminCommands = map[string]func(BotController, tgbotapi.Update, User){
+	"/secret":       handleDefaultMessage, // activate admin mode via /secret `AdminPass`
+	"/panel":        handleDefaultMessage, // open bot settings
+	"/usermode":     handleDefaultMessage, // temporarly disable admin mode to test ui
+	"/id":           handleDefaultMessage, // to check id of chat
+	"/setchannelid": handleDefaultMessage, // just type it in channel which one is supposed to be lined with bot
 }
 
 func main() {
@@ -30,7 +30,16 @@ func main() {
 
 func ProcessUpdate(bc BotController, update tgbotapi.Update) {
 	if update.Message != nil {
-		handleMessage(bc, update)
+		var UserID = update.Message.From.ID
+		user := bc.GetUser(UserID)
+		bc.LogMessage(update)
+
+		text := update.Message.Text
+		if strings.HasPrefix(text, "/") {
+			handleCommand(bc, update, user)
+		} else {
+			handleDefaultMessage(bc, update, user)
+		}
 	} else if update.CallbackQuery != nil {
 		handleCallbackQuery(bc, update)
 	} else if update.ChannelPost != nil {
@@ -38,32 +47,26 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
 	}
 }
 
-func handleMessage(bc BotController, update tgbotapi.Update) {
-	var UserID = update.Message.From.ID
-	user := bc.GetUser(UserID)
-	bc.LogMessage(update)
+func handleCommand(bc BotController, update tgbotapi.Update, user User) {
+	msg := update.Message
 
 	log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 	log.Printf("[Entities] %s", update.Message.Entities)
 	log.Printf("[COMMAND] %s", update.Message.Command())
 
-	possibleCommand := strings.Split(update.Message.Text, " ")[0]
-	args := strings.Split(update.Message.Text, " ")[1:]
-	log.Printf("Args: %s", args)
+	command := "/" + msg.Command() // if it is not a command, then it will simply be "/"
+	if user.IsAdmin() {
+		f, exists := adminCommands[command] // f is a function that handles specified command
+		if exists {
+			f(bc, update)
+			return
+		}
+	}
 
-	switch {
-	case possibleCommand == "/start":
+	// commands for non-admins
+	switch command {
+	case "/start":
 		handleStartCommand(bc, update, user)
-	case possibleCommand == "/id" && user.IsAdmin():
-		bc.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, strconv.FormatInt(update.Message.Chat.ID, 10)))
-	case possibleCommand == "/secret" && len(args) > 0 && args[0] == bc.cfg.AdminPass:
-		handleSecretCommand(bc, update, user)
-	case possibleCommand == "/panel" && user.IsAdmin():
-		handlePanelCommand(bc, update, user)
-	case possibleCommand == "/usermode" && user.IsEffectiveAdmin():
-		handleUserModeCommand(bc, update, user)
-	default:
-		handleDefaultMessage(bc, update, user)
 	}
 }
 
@@ -107,16 +110,6 @@ func handleStartCommand(bc BotController, update tgbotapi.Update, user User) {
 			tgbotapi.NewInlineKeyboardButtonData(bc.GetBotContent("leave_ticket_button"), "leave_ticket_button"),
 		),
 	)
-	if user.IsAdmin() {
-		kbd = tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(bc.GetBotContent("leave_ticket_button"), "leave_ticket_button"),
-			),
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Panel", "panel"),
-			),
-		)
-	}
 
 	img, err := bc.GetBotContentVerbose("preview_image")
 	if err != nil || img == "" {
@@ -133,10 +126,12 @@ func handleStartCommand(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handleSecretCommand(bc BotController, update tgbotapi.Update, user User) {
-	bc.db.Model(&user).Update("state", "start")
-	bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask|0b11) // set real admin ID (0b1) and effective admin toggle (0b10)
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You are admin now!")
-	bc.bot.Send(msg)
+	if update.Message.CommandArguments() == bc.cfg.AdminPass || user.IsAdmin() {
+		bc.db.Model(&user).Update("state", "start")
+		bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask|0b11) // set real admin ID (0b1) and effective admin toggle (0b10)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You are admin now!")
+		bc.bot.Send(msg)
+	}
 }
 
 func handlePanelCommand(bc BotController, update tgbotapi.Update, user User) {
