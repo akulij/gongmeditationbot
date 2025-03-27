@@ -1,8 +1,8 @@
 package main
 
 import (
-    "log"
 	"errors"
+	"log"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -71,5 +71,5 @@ func (bc BotController) GetUser(UserID int64) User {
 		bc.db.Create(&user)
 	}
 
-    return user
+	return user
 }

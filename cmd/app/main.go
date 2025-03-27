@@ -17,10 +17,8 @@ var adminCommands = map[string]func(BotController, tgbotapi.Update){
 	"/panel":        handleMessage, // open bot settings
 	"/usermode":     handleMessage, // temporarly disable admin mode to test ui
 	"/id":           handleMessage, // to check id of chat
-	"/setchannelid": handleMessage, // just type it in channel which one is
-                                    // supposed to be lined with bot
+	"/setchannelid": handleMessage, // just type it in channel which one is supposed to be lined with bot
 }
-
 
 func main() {
 	var bc = GetBotController()
@@ -42,7 +40,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
 
 func handleMessage(bc BotController, update tgbotapi.Update) {
 	var UserID = update.Message.From.ID
-    user := bc.GetUser(UserID)
+	user := bc.GetUser(UserID)
 
 	bc.db.Model(&user).Update("MsgCounter", user.MsgCounter+1)
 	log.Printf("User[%d] messages: %d", user.ID, user.MsgCounter)
@@ -70,7 +68,7 @@ func handleMessage(bc BotController, update tgbotapi.Update) {
 }
 
 func handleCallbackQuery(bc BotController, update tgbotapi.Update) {
-    user := bc.GetUser(update.CallbackQuery.From.ID)
+	user := bc.GetUser(update.CallbackQuery.From.ID)
 
 	if update.CallbackQuery.Data == "leave_ticket_button" {
 		handleLeaveTicketButton(bc, update, user)
@@ -347,11 +345,10 @@ func DownloadFile(filepath string, url string) error {
 
 func notifyAdminAboutError(bc BotController, errorMessage string) {
 	// Check if AdminID is set in the config
-    adminID := *bc.cfg.AdminID
+	adminID := *bc.cfg.AdminID
 	if adminID == 0 {
 		log.Println("AdminID is not set in the configuration.")
 	}
-
 
 	msg := tgbotapi.NewMessage(
 		adminID,
