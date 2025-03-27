@@ -297,6 +297,7 @@ func handleAdminCallback(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handlePanelCallback(bc BotController, update tgbotapi.Update, user User) {
+    if !user.IsAdmin() {return}
 	if !user.IsEffectiveAdmin() {
 		bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask|0b10)
 		msg := tgbotapi.NewMessage(user.ID, "You was in usermode, turned back to admin mode...")
