@@ -83,6 +83,7 @@ func handleMessage(bc BotController, update tgbotapi.Update) {
 	bc.db.Model(&user).Update("MsgCounter", user.MsgCounter+1)
 	log.Printf("User[%d] messages: %d", user.ID, user.MsgCounter)
 	log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+	log.Printf("[Entities] %s", update.Message.Entities)
 
 	possibleCommand := strings.Split(update.Message.Text, " ")[0]
 	args := strings.Split(update.Message.Text, " ")[1:]
