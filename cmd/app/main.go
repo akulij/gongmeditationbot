@@ -25,9 +25,9 @@ type BotController struct {
 
 func GetBotController() BotController {
 	cfg := config.GetConfig()
-	fmt.Printf("Token value: '%v'\n", cfg.BotToken)
-	fmt.Printf("Admin password: '%v'\n", cfg.AdminPass)
-	fmt.Printf("Admin ID: '%v'\n", *cfg.AdminID)
+	log.Printf("Token value: '%v'\n", cfg.BotToken)
+	log.Printf("Admin password: '%v'\n", cfg.AdminPass)
+	log.Printf("Admin ID: '%v'\n", *cfg.AdminID)
 
 	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
