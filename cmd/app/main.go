@@ -16,6 +16,7 @@ var adminCommands = map[string]func(BotController, tgbotapi.Update, User){
 	"/secret":       handleSecretCommand,  // activate admin mode via /secret `AdminPass`
 	"/panel":        handlePanelCommand,   // open bot settings
 	"/usermode":     handleDefaultMessage, // temporarly disable admin mode to test ui
+	"/deop":         handleDeopCommand,    // removes your admin rights at all!
 	"/id":           handleDefaultMessage, // to check id of chat
 	"/setchannelid": handleDefaultMessage, // just type it in channel which one is supposed to be lined with bot
 }
@@ -163,6 +164,13 @@ func handleUserModeCommand(bc BotController, update tgbotapi.Update, user User) 
 	bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask&(^uint(0b10)))
 	log.Printf("Set role bitmask (%b) for user: %d", user.RoleBitmask, user.ID)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Simulating user experience!")
+	bc.bot.Send(msg)
+}
+
+func handleDeopCommand(bc BotController, update tgbotapi.Update, user User) {
+	bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask&(^uint(0b11)))
+	log.Printf("Set role bitmask (%b) for user: %d", user.RoleBitmask, user.ID)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "DeOPed you!")
 	bc.bot.Send(msg)
 }
 
