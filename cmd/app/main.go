@@ -58,7 +58,7 @@ func handleCommand(bc BotController, update tgbotapi.Update, user User) {
 	if user.IsAdmin() {
 		f, exists := adminCommands[command] // f is a function that handles specified command
 		if exists {
-			f(bc, update)
+			f(bc, update, user)
 			return
 		}
 	}
