@@ -13,7 +13,6 @@ type User struct {
 	gorm.Model
 	ID          int64
 	State       string
-	MsgCounter  uint
 	RoleBitmask uint
 }
 
