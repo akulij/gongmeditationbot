@@ -1,6 +1,7 @@
 package main
 
 import (
+    "log"
 	"errors"
 
 	"gorm.io/driver/sqlite"
@@ -61,3 +62,14 @@ func (bc BotController) SetBotContent(Literal string, Content string) {
 	bc.db.Model(&c).Update("Content", Content)
 }
 
+func (bc BotController) GetUser(UserID int64) User {
+	var user User
+	bc.db.First(&user, "id", UserID)
+	if user == (User{}) {
+		log.Printf("New user: [%d]", UserID)
+		user = User{ID: UserID, State: "start"}
+		bc.db.Create(&user)
+	}
+
+    return user
+}

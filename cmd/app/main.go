@@ -42,14 +42,7 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
 
 func handleMessage(bc BotController, update tgbotapi.Update) {
 	var UserID = update.Message.From.ID
-
-	var user User
-	bc.db.First(&user, "id", UserID)
-	if user == (User{}) {
-		log.Printf("New user: [%d]", UserID)
-		user = User{ID: UserID, State: "start"}
-		bc.db.Create(&user)
-	}
+    user := bc.GetUser(UserID)
 
 	bc.db.Model(&user).Update("MsgCounter", user.MsgCounter+1)
 	log.Printf("User[%d] messages: %d", user.ID, user.MsgCounter)
@@ -77,8 +70,7 @@ func handleMessage(bc BotController, update tgbotapi.Update) {
 }
 
 func handleCallbackQuery(bc BotController, update tgbotapi.Update) {
-	var user User
-	bc.db.First(&user, "id", update.CallbackQuery.From.ID)
+    user := bc.GetUser(update.CallbackQuery.From.ID)
 
 	if update.CallbackQuery.Data == "leave_ticket_button" {
 		handleLeaveTicketButton(bc, update, user)
