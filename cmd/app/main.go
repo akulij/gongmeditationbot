@@ -21,6 +21,7 @@ var adminCommands = map[string]func(BotController, tgbotapi.Update, User){
 	"/setchannelid": handleDefaultMessage, // just type it in channel which one is supposed to be lined with bot
 }
 
+var nearDatesApril = []int {1, 3} // why? because it is as temporal as it can be
 
 func main() {
 	var bc = GetBotController()
