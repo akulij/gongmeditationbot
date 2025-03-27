@@ -67,6 +67,8 @@ func handleCommand(bc BotController, update tgbotapi.Update, user User) {
 	switch command {
 	case "/start":
 		handleStartCommand(bc, update, user)
+	case "/secret":
+		handleSecretCommand(bc, update, user)
 	}
 }
 
