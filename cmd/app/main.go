@@ -135,6 +135,7 @@ func handleSecretCommand(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handlePanelCommand(bc BotController, update tgbotapi.Update, user User) {
+    if !user.IsAdmin() {return}
 	if !user.IsEffectiveAdmin() {
 		bc.db.Model(&user).Update("RoleBitmask", user.RoleBitmask|0b10)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You was in usermode, turned back to admin mode...")
