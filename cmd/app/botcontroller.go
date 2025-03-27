@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 
 	"gorm.io/gorm"
@@ -43,4 +44,19 @@ func GetBotController() BotController {
 	updates := bot.GetUpdatesChan(u)
 
 	return BotController{cfg: cfg, bot: bot, db: db, updates: updates}
+}
+
+func (bc BotController) LogMessage(update tgbotapi.Update) error {
+	var msg *tgbotapi.Message
+	if update.Message != nil {
+		msg = update.Message
+	} else {
+		return errors.New("invalid update provided to message logger")
+	}
+
+	var UserID = msg.From.ID
+
+	bc.LogMessageRaw(UserID, msg.Text, msg.Time())
+
+	return nil
 }

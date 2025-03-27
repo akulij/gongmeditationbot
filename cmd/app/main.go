@@ -41,11 +41,13 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
 func handleMessage(bc BotController, update tgbotapi.Update) {
 	var UserID = update.Message.From.ID
 	user := bc.GetUser(UserID)
+	bc.LogMessage(update)
 
 	bc.db.Model(&user).Update("MsgCounter", user.MsgCounter+1)
 	log.Printf("User[%d] messages: %d", user.ID, user.MsgCounter)
 	log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 	log.Printf("[Entities] %s", update.Message.Entities)
+	log.Printf("[COMMAND] %s", update.Message.Command())
 
 	possibleCommand := strings.Split(update.Message.Text, " ")[0]
 	args := strings.Split(update.Message.Text, " ")[1:]

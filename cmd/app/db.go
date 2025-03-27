@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"log"
+	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -38,6 +39,7 @@ func GetDB() (*gorm.DB, error) {
 
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&BotContent{})
+	db.AutoMigrate(&Message{})
 
 	return db, err
 }
@@ -72,4 +74,20 @@ func (bc BotController) GetUser(UserID int64) User {
 	}
 
 	return user
+}
+
+type Message struct {
+	gorm.Model
+	UserID   int64
+	Msg      string
+	Datetime *time.Time
+}
+
+func (bc BotController) LogMessageRaw(UserID int64, Msg string, Time time.Time) {
+	msg := Message{
+		UserID:   UserID,
+		Msg:      Msg,
+		Datetime: &Time,
+	}
+	bc.db.Create(&msg)
 }
