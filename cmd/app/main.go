@@ -21,7 +21,7 @@ var adminCommands = map[string]func(BotController, tgbotapi.Update, User){
 	"/setchannelid": handleDefaultMessage, // just type it in channel which one is supposed to be lined with bot
 }
 
-var nearDatesApril = []int {1, 3} // why? because it is as temporal as it can be
+var nearDatesApril = []int{1, 3} // why? because it is as temporal as it can be
 
 func main() {
 	var bc = GetBotController()
@@ -140,7 +140,7 @@ func handleSecretCommand(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handlePanelCommand(bc BotController, update tgbotapi.Update, user User) {
-    handlePanel(bc, user)
+	handlePanel(bc, user)
 }
 
 func handleUserModeCommand(bc BotController, update tgbotapi.Update, user User) {
@@ -290,7 +290,7 @@ func handleAdminCallback(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handlePanelCallback(bc BotController, update tgbotapi.Update, user User) {
-    handlePanel(bc, user)
+	handlePanel(bc, user)
 }
 
 func DownloadFile(filepath string, url string) error {
@@ -315,12 +315,12 @@ func DownloadFile(filepath string, url string) error {
 }
 
 func notifyAdminAboutError(bc BotController, errorMessage string) {
-    // admins := getAdmins(bc)
-    // for _, admin := range admins {
-    // 	bc.bot.Send(tgbotapi.NewMessage(admin.ID, "ChannelID is set to "+strconv.FormatInt(post.SenderChat.ID, 10)))
-    // 	delcmd := tgbotapi.NewDeleteMessage(post.SenderChat.ID, post.MessageID)
-    // 	bc.bot.Send(delcmd)
-    // }
+	// admins := getAdmins(bc)
+	// for _, admin := range admins {
+	// 	bc.bot.Send(tgbotapi.NewMessage(admin.ID, "ChannelID is set to "+strconv.FormatInt(post.SenderChat.ID, 10)))
+	// 	delcmd := tgbotapi.NewDeleteMessage(post.SenderChat.ID, post.MessageID)
+	// 	bc.bot.Send(delcmd)
+	// }
 	// Check if AdminID is set in the config
 	adminID := *bc.cfg.AdminID
 	if adminID == 0 {
@@ -335,7 +335,7 @@ func notifyAdminAboutError(bc BotController, errorMessage string) {
 }
 
 func getAdmins(bc BotController) []User {
-    var admins []User
-    bc.db.Where("role_bitmask & 1 = ?", 1).Find(&admins)
-    return admins
+	var admins []User
+	bc.db.Where("role_bitmask & 1 = ?", 1).Find(&admins)
+	return admins
 }
