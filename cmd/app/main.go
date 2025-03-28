@@ -285,7 +285,7 @@ func handleAdminCallback(bc BotController, update tgbotapi.Update, user User) {
 		} else {
 			bc.db.Model(&user).Update("state", "stringset:"+Label)
 		}
-		bc.bot.Send(tgbotapi.NewMessage(user.ID, "Send me asset (text or picture (NOT as file))"))
+		bc.bot.Send(tgbotapi.NewMessage(user.ID, "Send me asset (text or picture (NOT as file)).\nSay `unset` to delete image.\nSay /start  to cancel action"))
 	}
 }
 
@@ -315,6 +315,12 @@ func DownloadFile(filepath string, url string) error {
 }
 
 func notifyAdminAboutError(bc BotController, errorMessage string) {
+    // admins := getAdmins(bc)
+    // for _, admin := range admins {
+    // 	bc.bot.Send(tgbotapi.NewMessage(admin.ID, "ChannelID is set to "+strconv.FormatInt(post.SenderChat.ID, 10)))
+    // 	delcmd := tgbotapi.NewDeleteMessage(post.SenderChat.ID, post.MessageID)
+    // 	bc.bot.Send(delcmd)
+    // }
 	// Check if AdminID is set in the config
 	adminID := *bc.cfg.AdminID
 	if adminID == 0 {
@@ -326,4 +332,10 @@ func notifyAdminAboutError(bc BotController, errorMessage string) {
 		fmt.Sprintf("Error occurred: %s", errorMessage),
 	)
 	bc.bot.Send(msg)
+}
+
+func getAdmins(bc BotController) []User {
+    var admins []User
+    bc.db.Where("role_bitmask & 1 = ?", 1).Find(&admins)
+    return admins
 }
