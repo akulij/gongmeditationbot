@@ -83,7 +83,7 @@ func notifyAboutEvents(bc BotController) {
 		events, _ := bc.GetAllEvents()
 		for _, event := range events {
 			delta := event.Date.Sub(time.Now())
-			if int(math.Floor(delta.Minutes())) == 8*60 { // 8 hours
+			if int(math.Ceil(delta.Minutes())) == 8*60 { // 8 hours
 				reservations, _ := bc.GetReservationsByEventID(event.ID)
 				for _, reservation := range reservations {
 					uid := reservation.UserID
