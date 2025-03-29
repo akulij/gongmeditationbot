@@ -209,13 +209,20 @@ func handleStartCommand(bc BotController, update tgbotapi.Update, user User) {
 	img, err := bc.GetBotContentVerbose("preview_image")
 	if err != nil || img == "" {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, bc.GetBotContent("start"))
-		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = kbd
+		var entities []tgbotapi.MessageEntity
+		meta, _ := bc.GetBotContentMetadata("start")
+		json.Unmarshal([]byte(meta), &entities)
+		msg.Entities = entities
 		bc.bot.Send(msg)
 	} else {
 		msg := tgbotapi.NewPhoto(update.Message.Chat.ID, tgbotapi.FileID(img))
 		msg.Caption = bc.GetBotContent("start")
 		msg.ReplyMarkup = kbd
+		var entities []tgbotapi.MessageEntity
+		meta, _ := bc.GetBotContentMetadata("start")
+		json.Unmarshal([]byte(meta), &entities)
+		msg.CaptionEntities = entities
 		bc.bot.Send(msg)
 	}
 }
