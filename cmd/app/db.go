@@ -91,6 +91,67 @@ func (bc BotController) LogMessageRaw(UserID int64, Msg string, Time time.Time) 
 	bc.db.Create(&msg)
 }
 
+type ReservationStatus int64
+const (
+    Booked ReservationStatus = iota
+    Paid
+)
+var ReservationStatusString = []string{
+    "Забронировано",
+    "Оплачено",
+}
+
+type Reservation struct {
+    gorm.Model
+    ID         int64 `gorm:"primary_key"`
+    UserID     int64 `gorm:"uniqueIndex:user_event_uniq"`
+    TimeBooked *time.Time
+    EventID    int64 `gorm:"uniqueIndex:user_event_uniq"`
+    Status     ReservationStatus
+}
+
+func (bc BotController) GetAllReservations() ([]Reservation, error) {
+	var reservations []Reservation
+	result := bc.db.Find(&reservations)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return reservations, nil
+}
+
+func (bc BotController) GetReservationsByEventID(EventID int64) ([]Reservation, error) {
+	var reservations []Reservation
+	result := bc.db.Where("event_id = ?", EventID).Find(&reservations)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return reservations, nil
+}
+
+type Event struct {
+    gorm.Model
+    ID         int64 `gorm:"primary_key"`
+    Date       *time.Time `gorm:"unique"`
+}
+
+func (bc BotController) GetAllEvents() ([]Event, error) {
+	var events []Event
+	result := bc.db.Find(&events)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return events, nil
+}
+
+func (bc BotController) GetEvent(EventID int64) (Event, error) {
+	var event Event
+	result := bc.db.First(&event, EventID)
+	if result.Error != nil {
+		return Event{}, result.Error
+	}
+	return event, nil
+}
+
 type TaskType int64
 const (
     SyncSheet TaskType = iota
