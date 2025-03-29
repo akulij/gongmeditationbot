@@ -43,8 +43,9 @@ func (u User) IsEffectiveAdmin() bool {
 
 type BotContent struct {
 	gorm.Model
-	Literal string
-	Content string
+	Literal  string
+	Content  string
+    Metadata string
 }
 
 func GetDB() (*gorm.DB, error) {
@@ -78,10 +79,20 @@ func (bc BotController) GetBotContent(Literal string) string {
 	return content
 }
 
-func (bc BotController) SetBotContent(Literal string, Content string) {
-	c := BotContent{Literal: Literal, Content: Content}
+func (bc BotController) GetBotContentMetadata(Literal string) (string, error) {
+	var c BotContent
+	bc.db.First(&c, "Literal", Literal)
+	if c == (BotContent{}) {
+		return "[]", errors.New("No metadata")
+	}
+	return c.Metadata, nil
+}
+
+func (bc BotController) SetBotContent(Literal string, Content string, Metadata string) {
+    c := BotContent{Literal: Literal, Content: Content, Metadata: Metadata}
 	bc.db.FirstOrCreate(&c, "Literal", Literal)
 	bc.db.Model(&c).Update("Content", Content)
+	bc.db.Model(&c).Update("Metadata", Metadata)
 }
 
 func (bc BotController) GetUser(UserID int64) User {
