@@ -16,6 +16,23 @@ type User struct {
 	RoleBitmask uint
 }
 
+func (bc BotController) GetUserByID(UserID int64) (User, error) {
+	var user User
+	bc.db.First(&user, "ID", UserID)
+	if user == (User{}) {
+		return User{}, errors.New("No content")
+	}
+	return user, nil
+}
+
+type UserInfo struct {
+	gorm.Model
+	ID          int64
+    Username    string
+    FirstName   string
+    LastName    string
+}
+
 func (u User) IsAdmin() bool {
 	return u.RoleBitmask&1 == 1
 }
@@ -37,6 +54,7 @@ func GetDB() (*gorm.DB, error) {
 	}
 
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&UserInfo{})
 	db.AutoMigrate(&BotContent{})
 	db.AutoMigrate(&Message{})
 	db.AutoMigrate(&Reservation{})
@@ -76,6 +94,21 @@ func (bc BotController) GetUser(UserID int64) User {
 	}
 
 	return user
+}
+
+func (bc BotController) UpdateUserInfo(ui UserInfo) {
+    bc.db.Save(&ui)
+}
+
+func (bc BotController) GetUserInfo(UserID int64) (UserInfo, error) {
+	var ui UserInfo
+	bc.db.First(&ui, "ID", UserID)
+	if ui == (UserInfo{}) {
+		log.Printf("NO UserInfo FOUND!!!, id: [%d]", UserID)
+        return UserInfo{}, errors.New("NO UserInfo FOUND!!!")
+	}
+
+	return ui, nil
 }
 
 type Message struct {
