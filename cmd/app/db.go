@@ -90,3 +90,42 @@ func (bc BotController) LogMessageRaw(UserID int64, Msg string, Time time.Time) 
 	}
 	bc.db.Create(&msg)
 }
+
+type TaskType int64
+const (
+    SyncSheet TaskType = iota
+    NotifyAboutEvent
+)
+
+type Task struct {
+    gorm.Model
+    ID      int64 `gorm:"primary_key"`
+    Type    TaskType
+    EventID int64
+}
+
+func (bc BotController) CreateSimpleTask(taskType TaskType) error {
+	task := Task{
+		Type:    taskType,
+	}
+    return bc.CreateTask(task)
+}
+
+func (bc BotController) CreateTask(task Task) error {
+	result := bc.db.Create(&task)
+	return result.Error
+}
+
+func (bc BotController) DeleteTask(taskID int64) error {
+	result := bc.db.Delete(&Task{}, taskID)
+	return result.Error
+}
+
+func (bc BotController) GetAllTasks() ([]Task, error) {
+	var tasks []Task
+	result := bc.db.Find(&tasks)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return tasks, nil
+}
