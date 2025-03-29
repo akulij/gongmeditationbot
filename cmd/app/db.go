@@ -39,6 +39,9 @@ func GetDB() (*gorm.DB, error) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&BotContent{})
 	db.AutoMigrate(&Message{})
+	db.AutoMigrate(&Reservation{})
+	db.AutoMigrate(&Event{})
+	db.AutoMigrate(&Task{})
 
 	return db, err
 }
