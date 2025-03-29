@@ -10,6 +10,9 @@ var assets = map[string]string{
 	"Просьба оставить тикет":         "leaveticket_message",
 	"Просьба подписаться на канал":   "subscribe_message",
 	"Ссылка на канал":                "channel_link",
+	"Подробнее о мероприятии":        "more_info",
+    "Текст о мероприятии":            "more_info_text",
+    "Текст: напоминание за 8 часов":  "notify_pre_event",
 }
 
 func handlePanel(bc BotController, user User) {
