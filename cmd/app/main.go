@@ -88,8 +88,10 @@ func notifyAboutEvents(bc BotController) {
 				for _, reservation := range reservations {
 					uid := reservation.UserID
 
-					msg := tgbotapi.NewMessage(uid, bc.GetBotContent("notify_pre_event"))
-					bc.bot.Send(msg)
+					go func() {
+						msg := tgbotapi.NewMessage(uid, bc.GetBotContent("notify_pre_event"))
+						bc.bot.Send(msg)
+					}()
 				}
 			}
 		}
