@@ -154,7 +154,6 @@ func handleCallbackQuery(bc BotController, update tgbotapi.Update) {
 	user := bc.GetUser(update.CallbackQuery.From.ID)
 
 	if update.CallbackQuery.Data == "more_info" {
-		sendMessage(bc, update.FromChat().ID, bc.GetBotContent("more_info_text"))
 		msg := tgbotapi.NewMessage(update.FromChat().ID, bc.GetBotContent("more_info_text"))
 		var entities []tgbotapi.MessageEntity
 		meta, _ := bc.GetBotContentMetadata("more_info_text")
