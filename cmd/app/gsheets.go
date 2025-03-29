@@ -4,35 +4,37 @@ import (
 	"context"
 	"fmt"
 	"log"
-    "time"
+	"time"
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
 
 func (bc *BotController) SyncPaidUsersToSheet() error {
-    reservations, _ := bc.GetAllReservations()
+	reservations, _ := bc.GetAllReservations()
 
 	ctx := context.Background()
 	srv, err := sheets.NewService(ctx,
-        option.WithCredentialsFile("./credentials.json"),
-        option.WithScopes(sheets.SpreadsheetsScope),
-    )
+		option.WithCredentialsFile("./credentials.json"),
+		option.WithScopes(sheets.SpreadsheetsScope),
+	)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve Sheets client: %v", err)
 	}
 
 	var values [][]interface{}
-    values = append(values, []interface{}{"Телеграм ID", "Имя", "Фамилия", "Никнейм", "Указанное имя", "Дата", "Телефон", "Статус"})
+	values = append(values, []interface{}{"Телеграм ID", "Имя", "Фамилия", "Никнейм", "Указанное имя", "Дата", "Телефон", "Статус"})
 
 	for _, reservation := range reservations {
-        if reservation.Status != Paid {continue}
+		if reservation.Status != Paid {
+			continue
+		}
 
-        uid := reservation.UserID
-        user, _ := bc.GetUserByID(uid)
-        ui, _ := bc.GetUserInfo(uid)
-        event, _ := bc.GetEvent(reservation.EventID)
-        status := ReservationStatusString[reservation.Status]
+		uid := reservation.UserID
+		user, _ := bc.GetUserByID(uid)
+		ui, _ := bc.GetUserInfo(uid)
+		event, _ := bc.GetEvent(reservation.EventID)
+		status := ReservationStatusString[reservation.Status]
 
 		values = append(values, []interface{}{user.ID, ui.FirstName, ui.LastName, ui.Username, "TODO", formatDate(event.Date), "", status})
 	}
@@ -55,5 +57,5 @@ func (bc *BotController) SyncPaidUsersToSheet() error {
 }
 
 func formatDate(t *time.Time) string {
-    return t.Format("02.01 15:04")
+	return t.Format("02.01 15:04")
 }

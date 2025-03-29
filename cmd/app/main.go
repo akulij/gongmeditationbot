@@ -1,16 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-    "time"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-    "encoding/json"
-    "math"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -22,45 +22,44 @@ var adminCommands = map[string]func(BotController, tgbotapi.Update, User){
 	"/deop":         handleDeopCommand,      // removes your admin rights at all!
 	"/id":           handleDefaultMessage,   // to check id of chat
 	"/setchannelid": handleDefaultMessage,   // just type it in channel which one is supposed to be lined with bot
-    "/broadcast":    handleBroadcastCommand, // use /broadcast `msg` to send msg to every known user
+	"/broadcast":    handleBroadcastCommand, // use /broadcast `msg` to send msg to every known user
 }
 
 var dubaiLocation, _ = time.LoadLocation("Asia/Dubai")
 
 var nearestDates = []time.Time{
-    time.Date(2025, 3, 28, 18, 0, 0, 0, dubaiLocation),
-    time.Date(2025, 4, 1, 18, 0, 0, 0, dubaiLocation),
-    time.Date(2025, 4, 2, 18, 0, 0, 0, dubaiLocation),
+	time.Date(2025, 3, 28, 18, 0, 0, 0, dubaiLocation),
+	time.Date(2025, 4, 1, 18, 0, 0, 0, dubaiLocation),
+	time.Date(2025, 4, 2, 18, 0, 0, 0, dubaiLocation),
 }
 
 var WeekLabels = []string{
-    "None",
-    "ПН",
-    "ВТ",
-    "СР",
-    "ЧТ",
-    "ПТ",
-    "СБ",
-    "ВС",
+	"None",
+	"ПН",
+	"ВТ",
+	"СР",
+	"ЧТ",
+	"ПТ",
+	"СБ",
+	"ВС",
 }
 
 func main() {
 	var bc = GetBotController()
-    button, callback := getDateButton(nearestDates[0])
-    log.Printf("Buttons: %s, %s\n", button, callback)
-    log.Printf("Location: %s\n", dubaiLocation.String())
-    log.Printf("Diff: %s\n", nearestDates[0].Sub(time.Now()))
+	button, callback := getDateButton(nearestDates[0])
+	log.Printf("Buttons: %s, %s\n", button, callback)
+	log.Printf("Location: %s\n", dubaiLocation.String())
+	log.Printf("Diff: %s\n", nearestDates[0].Sub(time.Now()))
 
+	// TODO: REMOVE
+	for _, date := range nearestDates {
+		event := Event{Date: &date}
+		bc.db.Create(&event)
+	}
 
-    // TODO: REMOVE
-    for _, date := range nearestDates {
-        event := Event{Date: &date}
-        bc.db.Create(&event)
-    }
-
-    // Run other background tasks
-    go continiousSyncGSheets(bc)
-    go notifyAboutEvents(bc)
+	// Run other background tasks
+	go continiousSyncGSheets(bc)
+	go notifyAboutEvents(bc)
 
 	for update := range bc.updates {
 		go ProcessUpdate(bc, update)
@@ -68,35 +67,35 @@ func main() {
 }
 
 func continiousSyncGSheets(bc BotController) {
-    for true {
-        err := bc.SyncPaidUsersToSheet()
-        if err != nil {
-            log.Printf("Error sync: %s\n", err)
-        }
+	for true {
+		err := bc.SyncPaidUsersToSheet()
+		if err != nil {
+			log.Printf("Error sync: %s\n", err)
+		}
 
-        time.Sleep(60 * time.Second)
-    }
+		time.Sleep(60 * time.Second)
+	}
 }
 
 func notifyAboutEvents(bc BotController) {
-    // TODO: migrate to tasks system
-    for true {
-        events, _ := bc.GetAllEvents()
-        for _, event := range events {
-            delta := event.Date.Sub(time.Now())
-            if int(math.Floor(delta.Minutes())) == 8 * 60 { // 8 hours
-                reservations, _ := bc.GetReservationsByEventID(event.ID)
-                for _, reservation := range reservations {
-                    uid := reservation.UserID
+	// TODO: migrate to tasks system
+	for true {
+		events, _ := bc.GetAllEvents()
+		for _, event := range events {
+			delta := event.Date.Sub(time.Now())
+			if int(math.Floor(delta.Minutes())) == 8*60 { // 8 hours
+				reservations, _ := bc.GetReservationsByEventID(event.ID)
+				for _, reservation := range reservations {
+					uid := reservation.UserID
 
-                    msg := tgbotapi.NewMessage(uid, bc.GetBotContent("notify_pre_event"))
-                    bc.bot.Send(msg)
-                }
-            }
-        }
+					msg := tgbotapi.NewMessage(uid, bc.GetBotContent("notify_pre_event"))
+					bc.bot.Send(msg)
+				}
+			}
+		}
 
-        time.Sleep(60 * time.Second)
-    }
+		time.Sleep(60 * time.Second)
+	}
 }
 
 func ProcessUpdate(bc BotController, update tgbotapi.Update) {
@@ -104,12 +103,12 @@ func ProcessUpdate(bc BotController, update tgbotapi.Update) {
 		var UserID = update.Message.From.ID
 		user := bc.GetUser(UserID)
 		bc.LogMessage(update)
-        log.Printf("Surname: %s\n", update.SentFrom().LastName)
-        bc.UpdateUserInfo(GetUserInfo(update.SentFrom()))
+		log.Printf("Surname: %s\n", update.SentFrom().LastName)
+		bc.UpdateUserInfo(GetUserInfo(update.SentFrom()))
 
-        // TODO: REMOVE
-        reservation := Reservation{UserID: UserID, EventID: 1, Status: Paid}
-        bc.db.Create(&reservation)
+		// TODO: REMOVE
+		reservation := Reservation{UserID: UserID, EventID: 1, Status: Paid}
+		bc.db.Create(&reservation)
 
 		text := update.Message.Text
 		if strings.HasPrefix(text, "/") {
@@ -153,13 +152,13 @@ func handleCallbackQuery(bc BotController, update tgbotapi.Update) {
 	user := bc.GetUser(update.CallbackQuery.From.ID)
 
 	if update.CallbackQuery.Data == "more_info" {
-        sendMessage(bc, update.FromChat().ID, bc.GetBotContent("more_info_text"))
-        msg := tgbotapi.NewMessage(update.FromChat().ID, bc.GetBotContent("more_info_text"))
-        var entities []tgbotapi.MessageEntity
-        meta, _ := bc.GetBotContentMetadata("more_info_text")
-        json.Unmarshal([]byte(meta), &entities)
-        msg.Entities = entities
-        bc.bot.Send(msg)
+		sendMessage(bc, update.FromChat().ID, bc.GetBotContent("more_info_text"))
+		msg := tgbotapi.NewMessage(update.FromChat().ID, bc.GetBotContent("more_info_text"))
+		var entities []tgbotapi.MessageEntity
+		meta, _ := bc.GetBotContentMetadata("more_info_text")
+		json.Unmarshal([]byte(meta), &entities)
+		msg.Entities = entities
+		bc.bot.Send(msg)
 	} else if user.IsEffectiveAdmin() {
 		handleAdminCallback(bc, update, user)
 	}
@@ -192,19 +191,19 @@ func handleStartCommand(bc BotController, update tgbotapi.Update, user User) {
 	bc.db.Model(&user).Update("state", "start")
 	rows := [][]tgbotapi.InlineKeyboardButton{}
 	for _, d := range nearestDates {
-        k, v := getDateButton(d)
+		k, v := getDateButton(d)
 		rows = append(rows,
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData(k, v),
 			),
 		)
 	}
-    rows = append(rows,
-        tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(
-            bc.GetBotContent("more_info"), "more_info",
-        )),
-    )
-    kbd := tgbotapi.NewInlineKeyboardMarkup(rows...)
+	rows = append(rows,
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(
+			bc.GetBotContent("more_info"), "more_info",
+		)),
+	)
+	kbd := tgbotapi.NewInlineKeyboardMarkup(rows...)
 
 	img, err := bc.GetBotContentVerbose("preview_image")
 	if err != nil || img == "" {
@@ -248,15 +247,17 @@ func handleDeopCommand(bc BotController, update tgbotapi.Update, user User) {
 }
 
 func handleBroadcastCommand(bc BotController, update tgbotapi.Update, user User) {
-    if !user.IsAdmin() {return}
+	if !user.IsAdmin() {
+		return
+	}
 
 	var users []User
 	bc.db.Find(&users)
 
-    for _, user := range users {
-        user = user
-        // TODO!!!
-    }
+	for _, user := range users {
+		user = user
+		// TODO!!!
+	}
 }
 
 func handleDefaultMessage(bc BotController, update tgbotapi.Update, user User) {
@@ -316,8 +317,8 @@ func handleDefaultMessage(bc BotController, update tgbotapi.Update, user User) {
 			} else if strings.HasPrefix(user.State, "stringset:") {
 				Literal := strings.Split(user.State, ":")[1]
 
-                b, _ := json.Marshal(update.Message.Entities)
-                strEntities := string(b)
+				b, _ := json.Marshal(update.Message.Entities)
+				strEntities := string(b)
 
 				bc.SetBotContent(Literal, update.Message.Text, strEntities)
 				bc.db.Model(&user).Update("state", "start")
@@ -448,18 +449,18 @@ func getAdmins(bc BotController) []User {
 
 func getDateButton(date time.Time) (string, string) {
 	// Format the date as needed, e.g., "2006-01-02"
-    wday := WeekLabels[int(date.Local().Weekday())]
+	wday := WeekLabels[int(date.Local().Weekday())]
 	formattedDate := strings.Join([]string{
-        date.Format("02.01.2006"),
-        "(" + wday + ")",
-        "в",
-        date.Format("15:04"),
-    }, " ")
+		date.Format("02.01.2006"),
+		"(" + wday + ")",
+		"в",
+		date.Format("15:04"),
+	}, " ")
 
 	// Create a token similar to what GetBotContent accepts
 	token := fmt.Sprintf("date_%s", date.Format("200601021504")) // Example token format
 
-    return strings.Join([]string{"Пойду", formattedDate}, " "), token
+	return strings.Join([]string{"Пойду", formattedDate}, " "), token
 }
 
 func GetUserInfo(user *tgbotapi.User) UserInfo {

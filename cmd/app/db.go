@@ -27,10 +27,10 @@ func (bc BotController) GetUserByID(UserID int64) (User, error) {
 
 type UserInfo struct {
 	gorm.Model
-	ID          int64
-    Username    string
-    FirstName   string
-    LastName    string
+	ID        int64
+	Username  string
+	FirstName string
+	LastName  string
 }
 
 func (u User) IsAdmin() bool {
@@ -45,7 +45,7 @@ type BotContent struct {
 	gorm.Model
 	Literal  string
 	Content  string
-    Metadata string
+	Metadata string
 }
 
 func GetDB() (*gorm.DB, error) {
@@ -89,7 +89,7 @@ func (bc BotController) GetBotContentMetadata(Literal string) (string, error) {
 }
 
 func (bc BotController) SetBotContent(Literal string, Content string, Metadata string) {
-    c := BotContent{Literal: Literal, Content: Content, Metadata: Metadata}
+	c := BotContent{Literal: Literal, Content: Content, Metadata: Metadata}
 	bc.db.FirstOrCreate(&c, "Literal", Literal)
 	bc.db.Model(&c).Update("Content", Content)
 	bc.db.Model(&c).Update("Metadata", Metadata)
@@ -108,7 +108,7 @@ func (bc BotController) GetUser(UserID int64) User {
 }
 
 func (bc BotController) UpdateUserInfo(ui UserInfo) {
-    bc.db.Save(&ui)
+	bc.db.Save(&ui)
 }
 
 func (bc BotController) GetUserInfo(UserID int64) (UserInfo, error) {
@@ -116,7 +116,7 @@ func (bc BotController) GetUserInfo(UserID int64) (UserInfo, error) {
 	bc.db.First(&ui, "ID", UserID)
 	if ui == (UserInfo{}) {
 		log.Printf("NO UserInfo FOUND!!!, id: [%d]", UserID)
-        return UserInfo{}, errors.New("NO UserInfo FOUND!!!")
+		return UserInfo{}, errors.New("NO UserInfo FOUND!!!")
 	}
 
 	return ui, nil
@@ -139,22 +139,24 @@ func (bc BotController) LogMessageRaw(UserID int64, Msg string, Time time.Time) 
 }
 
 type ReservationStatus int64
+
 const (
-    Booked ReservationStatus = iota
-    Paid
+	Booked ReservationStatus = iota
+	Paid
 )
+
 var ReservationStatusString = []string{
-    "Забронировано",
-    "Оплачено",
+	"Забронировано",
+	"Оплачено",
 }
 
 type Reservation struct {
-    gorm.Model
-    ID         int64 `gorm:"primary_key"`
-    UserID     int64 `gorm:"uniqueIndex:user_event_uniq"`
-    TimeBooked *time.Time
-    EventID    int64 `gorm:"uniqueIndex:user_event_uniq"`
-    Status     ReservationStatus
+	gorm.Model
+	ID         int64 `gorm:"primary_key"`
+	UserID     int64 `gorm:"uniqueIndex:user_event_uniq"`
+	TimeBooked *time.Time
+	EventID    int64 `gorm:"uniqueIndex:user_event_uniq"`
+	Status     ReservationStatus
 }
 
 func (bc BotController) GetAllReservations() ([]Reservation, error) {
@@ -176,9 +178,9 @@ func (bc BotController) GetReservationsByEventID(EventID int64) ([]Reservation, 
 }
 
 type Event struct {
-    gorm.Model
-    ID         int64 `gorm:"primary_key"`
-    Date       *time.Time `gorm:"unique"`
+	gorm.Model
+	ID   int64      `gorm:"primary_key"`
+	Date *time.Time `gorm:"unique"`
 }
 
 func (bc BotController) GetAllEvents() ([]Event, error) {
@@ -200,23 +202,24 @@ func (bc BotController) GetEvent(EventID int64) (Event, error) {
 }
 
 type TaskType int64
+
 const (
-    SyncSheet TaskType = iota
-    NotifyAboutEvent
+	SyncSheet TaskType = iota
+	NotifyAboutEvent
 )
 
 type Task struct {
-    gorm.Model
-    ID      int64 `gorm:"primary_key"`
-    Type    TaskType
-    EventID int64
+	gorm.Model
+	ID      int64 `gorm:"primary_key"`
+	Type    TaskType
+	EventID int64
 }
 
 func (bc BotController) CreateSimpleTask(taskType TaskType) error {
 	task := Task{
-		Type:    taskType,
+		Type: taskType,
 	}
-    return bc.CreateTask(task)
+	return bc.CreateTask(task)
 }
 
 func (bc BotController) CreateTask(task Task) error {
