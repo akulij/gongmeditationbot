@@ -1,18 +1,22 @@
 package main
 
 var assets = map[string]string{
-	"Стартовая картинка":             "preview_image",
-	"Приветственный текст":           "start",
-	"Кнопка для заявки":              "leave_ticket_button",
-	"ID чата":                        "supportchatid",
-	"ID канала":                      "channelid",
-	"Уведомление об отправке тикета": "sended_notify",
-	"Просьба оставить тикет":         "leaveticket_message",
-	"Просьба подписаться на канал":   "subscribe_message",
-	"Ссылка на канал":                "channel_link",
-	"Подробнее о мероприятии":        "more_info",
-	"Текст о мероприятии":            "more_info_text",
-	"Текст: напоминание за 8 часов":  "notify_pre_event",
+	"Стартовая картинка":                 "preview_image",
+	"Приветственный текст":               "start",
+	"Кнопка для заявки":                  "leave_ticket_button",
+	"ID чата":                            "supportchatid",
+	"ID канала":                          "channelid",
+	"Уведомление об отправке тикета":     "sended_notify",
+	"Просьба оставить тикет":             "leaveticket_message",
+	"Просьба подписаться на канал":       "subscribe_message",
+	"Ссылка на канал":                    "channel_link",
+	"Подробнее о мероприятии":            "more_info",
+	"Текст о мероприятии":                "more_info_text",
+	"Текст: напоминание за 8 часов":      "notify_pre_event",
+	"Текст: забронированно и ввести имя": "reserved_message",
+	"Текст: после имени на оплату":       "ask_to_pay",
+	"Текст: распродано":                  "soldout_message",
+	"Текст: После оплаты":                "post_payment_message",
 }
 
 func handlePanel(bc BotController, user User) {
