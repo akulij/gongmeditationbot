@@ -34,14 +34,13 @@ var nearestDates = []time.Time{
 }
 
 var WeekLabels = []string{
-	"None",
+	"ВС",
 	"ПН",
 	"ВТ",
 	"СР",
 	"ЧТ",
 	"ПТ",
 	"СБ",
-	"ВС",
 }
 
 func main() {
