@@ -335,6 +335,19 @@ func handleDefaultMessage(bc BotController, update tgbotapi.Update, user User) {
 		bc.db.Model(&user).Update("state", "start")
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, bc.GetBotContent("sended_notify"))
 		bc.bot.Send(msg)
+	} else if strings.HasPrefix(user.State, "enternamereservation:") {
+		resstr := strings.Split(user.State, ":")[1]
+		reservationid, _ := strconv.ParseInt(resstr, 10, 64)
+		reservation, _ := bc.GetReservationByID(reservationid)
+		reservation.EnteredName = update.Message.Text
+		nd := time.Now().In(dubaiLocation)
+		reservation.TimeBooked = &nd
+		bc.UpdateReservation(reservation)
+
+		sendMessageKeyboard(bc, user.ID, bc.GetBotContent("ask_to_pay"),
+			generateTgInlineKeyboard(map[string]string{"ТЕСТ оплачено": "paidcallback:" + strconv.FormatInt(reservationid, 10)}),
+		)
+
 	} else if user.IsEffectiveAdmin() {
 		if user.State != "start" {
 			if strings.HasPrefix(user.State, "imgset:") {
