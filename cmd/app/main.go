@@ -227,11 +227,24 @@ func handleChannelPost(bc BotController, update tgbotapi.Update) {
 func handleStartCommand(bc BotController, update tgbotapi.Update, user User) {
 	bc.db.Model(&user).Update("state", "start")
 	rows := [][]tgbotapi.InlineKeyboardButton{}
-	for _, d := range nearestDates {
-		k, v := getDateButton(d)
+	events, _ := bc.GetAllEvents()
+	for _, event := range events {
+		if event.Date.Sub(time.Now()) < 2*time.Hour {
+			continue
+		}
+		k, _ := getDateButton(*event.Date)
+		taken, _ := bc.CountReservationsByEventID(event.ID)
+		k = strings.Join([]string{
+			k,
+			"(" + strconv.FormatInt(taken, 10) + "/" + strconv.Itoa(seatscnt) + ")",
+		}, " ")
+		if taken == seatscnt {
+			k += " (Распродано)"
+		}
+		token := "reservedate:" + strconv.FormatInt(event.ID, 10)
 		rows = append(rows,
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(k, v),
+				tgbotapi.NewInlineKeyboardButtonData(k, token),
 			),
 		)
 	}
