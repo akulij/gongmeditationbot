@@ -528,3 +528,18 @@ func GetUserInfo(user *tgbotapi.User) UserInfo {
 		LastName:  user.LastName,
 	}
 }
+
+func notifyPaid(bc BotController, reservation Reservation) {
+	chatidstr := bc.GetBotContent("supportchatid")
+	chatid, _ := strconv.ParseInt(chatidstr, 10, 64)
+	ui, _ := bc.GetUserInfo(reservation.UserID)
+	event, _ := bc.GetEvent(reservation.EventID)
+	msg := fmt.Sprintf(
+		"Пользователь %s (%s) оплатил на %s",
+		ui.FirstName,
+		ui.Username,
+		event.Date.Format("02.01 15:04"),
+	)
+
+	bc.bot.Send(tgbotapi.NewMessage(chatid, msg))
+}
