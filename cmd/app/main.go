@@ -515,7 +515,7 @@ func getDateButton(date time.Time) (string, string) {
 	}, " ")
 
 	// Create a token similar to what GetBotContent accepts
-	token := fmt.Sprintf("date_%s", date.Format("200601021504")) // Example token format
+	token := fmt.Sprintf("reservedate:%s", date.Format("200601021504")) // Example token format
 
 	return strings.Join([]string{"Пойду", formattedDate}, " "), token
 }
