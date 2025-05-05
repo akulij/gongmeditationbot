@@ -33,6 +33,8 @@ var nearestDates = []time.Time{
 	time.Date(2025, 4, 2, 18, 0, 0, 0, dubaiLocation),
 }
 
+const seatscnt = 10
+
 var WeekLabels = []string{
 	"ВС",
 	"ПН",
