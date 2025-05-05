@@ -36,7 +36,7 @@ func (bc *BotController) SyncPaidUsersToSheet() error {
 		event, _ := bc.GetEvent(reservation.EventID)
 		status := ReservationStatusString[reservation.Status]
 
-		values = append(values, []interface{}{user.ID, ui.FirstName, ui.LastName, ui.Username, "TODO", formatDate(event.Date), "", status})
+		values = append(values, []interface{}{user.ID, ui.FirstName, ui.LastName, ui.Username, reservation.EnteredName, formatDate(event.Date), "", status})
 	}
 
 	// Prepare the data to be written to the sheet
