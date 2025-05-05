@@ -172,6 +172,28 @@ func handleCallbackQuery(bc BotController, update tgbotapi.Update) {
 		notifyPaid(bc, reservation)
 
 		sendMessage(bc, update.CallbackQuery.From.ID, bc.GetBotContent("post_payment_message"))
+	} else if strings.HasPrefix(update.CallbackQuery.Data, "reservedate:") {
+		datetoken := strings.Split(update.CallbackQuery.Data, ":")[1]
+		eventid, err := strconv.ParseInt(datetoken, 10, 64)
+		if err != nil {
+			log.Printf("Error parsing date token: %s\n", err)
+			return
+		}
+		taken, _ := bc.CountReservationsByEventID(eventid)
+		if taken >= seatscnt {
+			sendMessage(bc, user.ID, bc.GetBotContent("soldout_message"))
+			return
+		}
+		// event, _ := bc.GetEvent(eventid)
+		reservation, err := bc.CreateReservation(update.CallbackQuery.From.ID, eventid, "Не указано")
+		if err != nil {
+			log.Printf("Error creating reservation: %s\n", err)
+			return
+		}
+
+		bc.db.Model(&user).Update("state", "enternamereservation:"+strconv.FormatInt(reservation.ID, 10))
+		sendMessage(bc, user.ID, bc.GetBotContent("reserved_message"))
+
 	} else if user.IsEffectiveAdmin() {
 		handleAdminCallback(bc, update, user)
 	}
