@@ -159,6 +159,19 @@ func handleCallbackQuery(bc BotController, update tgbotapi.Update) {
 		json.Unmarshal([]byte(meta), &entities)
 		msg.Entities = entities
 		bc.bot.Send(msg)
+	} else if strings.HasPrefix(update.CallbackQuery.Data, "paidcallback:") {
+		token := strings.Split(update.CallbackQuery.Data, ":")[1]
+		reservationid, err := strconv.ParseInt(token, 10, 64)
+		if err != nil {
+			log.Printf("Error parsing reservation token: %s\n", err)
+			return
+		}
+		reservation, _ := bc.GetReservationByID(reservationid)
+		reservation.Status = Paid
+		bc.UpdateReservation(reservation)
+		notifyPaid(bc, reservation)
+
+		sendMessage(bc, update.CallbackQuery.From.ID, bc.GetBotContent("post_payment_message"))
 	} else if user.IsEffectiveAdmin() {
 		handleAdminCallback(bc, update, user)
 	}
