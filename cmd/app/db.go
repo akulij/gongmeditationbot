@@ -152,11 +152,12 @@ var ReservationStatusString = []string{
 
 type Reservation struct {
 	gorm.Model
-	ID         int64 `gorm:"primary_key"`
-	UserID     int64 `gorm:"uniqueIndex:user_event_uniq"`
-	TimeBooked *time.Time
-	EventID    int64 `gorm:"uniqueIndex:user_event_uniq"`
-	Status     ReservationStatus
+	ID          int64 `gorm:"primary_key"`
+	UserID      int64 `gorm:"uniqueIndex:user_event_uniq"`
+	EnteredName string
+	TimeBooked  *time.Time
+	EventID     int64 `gorm:"uniqueIndex:user_event_uniq"`
+	Status      ReservationStatus
 }
 
 func (bc BotController) GetAllReservations() ([]Reservation, error) {
@@ -175,6 +176,42 @@ func (bc BotController) GetReservationsByEventID(EventID int64) ([]Reservation, 
 		return nil, result.Error
 	}
 	return reservations, nil
+}
+
+func (bc BotController) CountReservationsByEventID(EventID int64) (int64, error) {
+	var count int64
+	result := bc.db.Model(&Reservation{}).Where("event_id = ?", EventID).Count(&count)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return count, nil
+}
+
+func (bc BotController) CreateReservation(userID int64, eventID int64, name string) (Reservation, error) {
+	var dubaiLocation, _ = time.LoadLocation("Asia/Dubai")
+	timenow := time.Now().In(dubaiLocation)
+	reservation := Reservation{
+		UserID:      userID,
+		EventID:     eventID,
+		TimeBooked:  &timenow,
+		Status:      Booked,
+		EnteredName: name,
+	}
+	result := bc.db.Create(&reservation)
+	return reservation, result.Error
+}
+
+func (bc BotController) GetReservationByID(reservationID int64) (Reservation, error) {
+	var reservation Reservation
+	result := bc.db.First(&reservation, reservationID)
+	if result.Error != nil {
+		return Reservation{}, result.Error
+	}
+	return reservation, nil
+}
+
+func (bc BotController) UpdateReservation(r Reservation) {
+	bc.db.Save(&r)
 }
 
 type Event struct {
